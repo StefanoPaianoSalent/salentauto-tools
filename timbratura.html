@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timbratura — Salentauto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Archivo:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #16181a; --panel: #1e2124; --panel-alt: #24272a;
+    --border: #34383c; --border-soft: #2a2d30;
+    --text: #edeae2; --text-dim: #9b9890; --text-faint: #6d6a64;
+    --amber: #e3a83d; --amber-dim: #4a3a1e;
+    --teal: #5cc7bd; --teal-dim: #1c3d3a;
+    --red: #d0665f; --red-dim: #4a2320;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Archivo', sans-serif;
+    margin: 0; padding: 24px 16px 80px; min-height: 100vh;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  header { margin-bottom: 20px; }
+  header .brand { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--text-faint); margin-bottom: 6px; }
+  header h1 { font-family: 'Archivo Narrow', sans-serif; font-weight: 700; font-size: 26px; margin: 0; }
+
+  .card-box {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px; margin-bottom: 16px;
+  }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12.5px; color: var(--text-dim); margin-bottom: 5px; }
+  input[type=text], input[type=password], select {
+    width: 100%; font-family: 'Archivo', sans-serif; font-size: 15px;
+    background: var(--panel-alt); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px; padding: 11px 12px;
+  }
+  .btn {
+    font-family: 'Archivo Narrow', sans-serif; font-weight: 600; font-size: 16px;
+    background: var(--panel-alt); color: var(--text); border: 1px solid var(--border);
+    border-radius: 9px; padding: 13px 18px; cursor: pointer;
+  }
+  .btn:hover { border-color: var(--amber); }
+  .btn-amber { background: var(--amber); color: #2a1e08; border-color: var(--amber); }
+  .btn-teal { background: var(--teal); color: #0c2b28; border-color: var(--teal); }
+  .btn-red { background: var(--red); color: #340e0c; border-color: var(--red); }
+  .btn-ghost { background: transparent; color: var(--text-faint); border-color: transparent; }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-big { width: 100%; padding: 22px; font-size: 20px; border-radius: 12px; }
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+
+  .who-badge {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 14px; color: var(--text-dim); margin-bottom: 14px;
+  }
+  .who-badge b { color: var(--text); }
+  .who-badge a { color: var(--amber); text-decoration: none; font-size: 13px; }
+
+  #operaiList { list-style: none; margin: 8px 0; padding: 0; }
+  #operaiList li {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 10px; background: var(--panel-alt); border-radius: 7px; margin-bottom: 6px; font-size: 14px;
+  }
+  #operaiList li button { background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; }
+
+  .search-results { margin-top: 8px; max-height: 220px; overflow-y: auto; }
+  .search-results .item {
+    padding: 12px 14px; background: var(--panel-alt); border-radius: 8px; margin-bottom: 6px;
+    cursor: pointer; font-size: 15px;
+  }
+  .search-results .item:hover { outline: 1px solid var(--amber); }
+
+  .job-title { font-family: 'Archivo Narrow', sans-serif; font-weight: 700; font-size: 20px; margin-bottom: 2px; }
+  .job-meta { font-size: 13px; color: var(--text-faint); margin-bottom: 18px; }
+  .job-meta a { color: var(--text-faint); }
+
+  .timer-display {
+    text-align: center; padding: 20px 0 8px;
+  }
+  .timer-display .clock {
+    font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 52px; letter-spacing: 0.02em;
+  }
+  .timer-display .status-label { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+  .timer-display.active .clock { color: var(--teal); }
+  .timer-display.paused .clock { color: var(--amber); }
+  .timer-display.idle .clock { color: var(--text-faint); }
+
+  .compare-box {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    background: var(--border-soft); border-radius: 10px; overflow: hidden; margin: 16px 0;
+  }
+  .compare-box .cell { background: var(--panel); padding: 14px 16px; text-align: center; }
+  .compare-box .cell .lbl { font-size: 11.5px; color: var(--text-faint); margin-bottom: 4px; }
+  .compare-box .cell .val { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; }
+  .compare-box .cell.over .val { color: var(--red); }
+  .compare-box .cell.under .val { color: var(--teal); }
+
+  .per-operaio { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+  .per-operaio .row-op { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border-soft); }
+  .per-operaio .row-op:last-child { border-bottom: none; }
+
+  .settings-toggle-btn {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    background: transparent; color: var(--text-faint); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px; cursor: pointer; margin-top: 10px;
+  }
+  #settingsStatus, #genStatus { font-size: 12.5px; margin-top: 8px; }
+  .ok { color: var(--teal); } .err { color: var(--red); }
+  .hint { font-size: 12.5px; color: var(--text-faint); line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">Salentauto — strumenti officina</div>
+    <h1>Timbratura lavorazioni</h1>
+  </header>
+
+  <div id="setupBox" class="card-box" style="display:none;">
+    <h2 style="font-family:'Archivo Narrow',sans-serif;font-size:17px;margin:0 0 4px;">Collegamento Trello</h2>
+    <p class="hint">Se hai già configurato l'estrattore preventivi su questo browser, le credenziali sono già qui.</p>
+    <div class="field"><label>API Key</label><input type="text" id="apiKeyInput"></div>
+    <div class="field"><label>Token</label><input type="password" id="apiTokenInput"></div>
+    <button class="btn btn-amber" id="connectBtn">Connetti</button>
+    <div id="settingsStatus"></div>
+    <div class="field" id="orgField" style="display:none; margin-top:14px;">
+      <label>Spazio di lavoro</label>
+      <select id="orgSelect"></select>
+      <button class="btn" id="saveOrgBtn" style="margin-top:10px;">Salva</button>
+    </div>
+  </div>
+
+  <div id="operaiBox" class="card-box" style="display:none;">
+    <h2 style="font-family:'Archivo Narrow',sans-serif;font-size:17px;margin:0 0 10px;">Operai</h2>
+    <div class="row">
+      <input type="text" id="newOperaioInput" placeholder="Nome operaio">
+      <button class="btn" id="addOperaioBtn" style="flex:0 0 auto;">Aggiungi</button>
+    </div>
+    <ul id="operaiList"></ul>
+    <div class="field" style="margin-top:14px;">
+      <label>Questo dispositivo è</label>
+      <select id="deviceModeSelect">
+        <option value="personale">Personale (ricorda chi sono)</option>
+        <option value="condiviso">Condiviso / tablet in officina (chiede ogni volta)</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="settings-toggle-btn" id="settingsToggle" style="display:none;">⚙ Impostazioni</button>
+
+  <div id="mainFlow" style="margin-top:16px;"></div>
+</div>
+
+<script>
+/* ---------- Storage condiviso con estrai_preventivo.html ---------- */
+const TRELLO_LS_KEY = "estrattorePreventivi.trelloSettings";
+const OPERAI_LS_KEY = "estrattorePreventivi.operai";
+const DEVICE_LS_KEY = "estrattorePreventivi.timbraturaDevice";
+
+function loadTrelloSettings() {
+  try { return JSON.parse(localStorage.getItem(TRELLO_LS_KEY)) || {}; }
+  catch (e) { return {}; }
+}
+function saveTrelloSettings(patch) {
+  const next = Object.assign({}, loadTrelloSettings(), patch);
+  localStorage.setItem(TRELLO_LS_KEY, JSON.stringify(next));
+  return next;
+}
+function loadOperai() {
+  try { return JSON.parse(localStorage.getItem(OPERAI_LS_KEY)) || []; }
+  catch (e) { return []; }
+}
+function saveOperai(list) { localStorage.setItem(OPERAI_LS_KEY, JSON.stringify(list)); }
+function loadDevice() {
+  try { return JSON.parse(localStorage.getItem(DEVICE_LS_KEY)) || { mode: "personale" }; }
+  catch (e) { return { mode: "personale" }; }
+}
+function saveDevice(patch) {
+  const next = Object.assign({}, loadDevice(), patch);
+  localStorage.setItem(DEVICE_LS_KEY, JSON.stringify(next));
+  return next;
+}
+
+function escapeHtml(s) {
+  return (s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+/* ---------- Helper Trello ---------- */
+function trelloUrl(path, params) {
+  const s = loadTrelloSettings();
+  const url = new URL("https://api.trello.com/1" + path);
+  url.searchParams.set("key", s.apiKey || "");
+  url.searchParams.set("token", s.apiToken || "");
+  for (const k in (params || {})) url.searchParams.set(k, params[k]);
+  return url.toString();
+}
+async function trelloGet(path, params) {
+  const r = await fetch(trelloUrl(path, params));
+  if (!r.ok) throw new Error(`Trello API ${r.status}: ${await r.text()}`);
+  return r.json();
+}
+async function trelloPost(path, params) {
+  const r = await fetch(trelloUrl(path, params), { method: "POST" });
+  if (!r.ok) throw new Error(`Trello API ${r.status}: ${await r.text()}`);
+  return r.json();
+}
+
+/* ---------- Setup Trello (riusa credenziali del tool principale) ---------- */
+
+function isTrelloReady() {
+  const s = loadTrelloSettings();
+  return !!(s.apiKey && s.apiToken && s.orgId);
+}
+
+function fillSetupForm() {
+  const s = loadTrelloSettings();
+  document.getElementById("apiKeyInput").value = s.apiKey || "";
+  document.getElementById("apiTokenInput").value = s.apiToken || "";
+}
+
+document.getElementById("connectBtn").addEventListener("click", async () => {
+  const apiKey = document.getElementById("apiKeyInput").value.trim();
+  const apiToken = document.getElementById("apiTokenInput").value.trim();
+  if (!apiKey || !apiToken) { setSetupStatus("Inserisci API key e token.", "err"); return; }
+  saveTrelloSettings({ apiKey, apiToken });
+  setSetupStatus("Connessione in corso…", "");
+  try {
+    const orgs = await trelloGet("/members/me/organizations", { fields: "displayName" });
+    const sel = document.getElementById("orgSelect");
+    sel.innerHTML = orgs.map((o) => `<option value="${o.id}">${escapeHtml(o.displayName)}</option>`).join("");
+    const s = loadTrelloSettings();
+    if (s.orgId && orgs.some((o) => o.id === s.orgId)) sel.value = s.orgId;
+    document.getElementById("orgField").style.display = "block";
+    setSetupStatus(`Connesso — ${orgs.length} spazi di lavoro trovati.`, "ok");
+  } catch (err) {
+    setSetupStatus("Errore: " + err.message, "err");
+  }
+});
+
+document.getElementById("saveOrgBtn").addEventListener("click", () => {
+  const orgId = document.getElementById("orgSelect").value;
+  saveTrelloSettings({ orgId });
+  setSetupStatus("Salvato.", "ok");
+  boot();
+});
+
+function setSetupStatus(msg, cls) {
+  const el = document.getElementById("settingsStatus");
+  el.textContent = msg; el.className = cls || "";
+}
+
+/* ---------- Gestione operai ---------- */
+
+function renderOperaiList() {
+  const list = loadOperai();
+  const ul = document.getElementById("operaiList");
+  ul.innerHTML = list.map((name, i) =>
+    `<li>${escapeHtml(name)}<button data-i="${i}">✕</button></li>`
+  ).join("") || `<li style="color:var(--text-faint);">Nessun operaio ancora aggiunto</li>`;
+  ul.querySelectorAll("button[data-i]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const l = loadOperai();
+      l.splice(Number(btn.dataset.i), 1);
+      saveOperai(l);
+      renderOperaiList();
+      renderWhoAmI();
+    });
+  });
+}
+
+document.getElementById("addOperaioBtn").addEventListener("click", () => {
+  const input = document.getElementById("newOperaioInput");
+  const name = input.value.trim();
+  if (!name) return;
+  const list = loadOperai();
+  if (!list.includes(name)) { list.push(name); saveOperai(list); }
+  input.value = "";
+  renderOperaiList();
+  renderWhoAmI();
+});
+document.getElementById("newOperaioInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") document.getElementById("addOperaioBtn").click();
+});
+
+document.getElementById("deviceModeSelect").addEventListener("change", (e) => {
+  saveDevice({ mode: e.target.value });
+  renderWhoAmI();
+});
+
+document.getElementById("settingsToggle").addEventListener("click", () => {
+  const box = document.getElementById("operaiBox");
+  const closing = box.style.display === "block";
+  box.style.display = closing ? "none" : "block";
+  document.getElementById("setupBox").style.display = box.style.display;
+  if (closing) renderWhoAmI();
+});
+
+/* ---------- Boot ---------- */
+
+function applySetupLinkIfPresent() {
+  const hash = window.location.hash || "";
+  const m = hash.match(/setup=([^&]+)/);
+  if (!m) return false;
+  try {
+    const payload = JSON.parse(decodeURIComponent(m[1]));
+    if (payload.apiKey && payload.apiToken) {
+      saveTrelloSettings({ apiKey: payload.apiKey, apiToken: payload.apiToken, orgId: payload.orgId, mdoFieldName: payload.mdoFieldName });
+    }
+  } catch (e) { /* link malformato, ignora */ }
+  // rimuove subito i dati sensibili dall'URL/cronologia
+  history.replaceState(null, "", window.location.pathname + window.location.search);
+  return true;
+}
+
+function boot() {
+  const cameFromSetupLink = applySetupLinkIfPresent();
+  fillSetupForm();
+  document.getElementById("deviceModeSelect").value = loadDevice().mode || "personale";
+  renderOperaiList();
+
+  if (!isTrelloReady()) {
+    document.getElementById("setupBox").style.display = "block";
+    document.getElementById("operaiBox").style.display = "block";
+    document.getElementById("mainFlow").innerHTML = "";
+    return;
+  }
+  document.getElementById("settingsToggle").style.display = "inline-block";
+  document.getElementById("setupBox").style.display = "none";
+  document.getElementById("operaiBox").style.display = cameFromSetupLink ? "block" : "none";
+  if (cameFromSetupLink) {
+    document.getElementById("mainFlow").innerHTML = `<div class="card-box" style="color:var(--teal);">✓ Collegamento configurato automaticamente. Aggiungi il tuo nome tra gli operai qui sopra se non c'è già, poi tocca "⚙ Impostazioni" per chiudere e iniziare.</div>`;
+  } else {
+    renderWhoAmI();
+  }
+}
+
+/* ---------- Chi sono ---------- */
+
+window.__currentOperaio = null;
+
+function renderWhoAmI() {
+  if (!isTrelloReady()) return;
+  const device = loadDevice();
+  const mainFlow = document.getElementById("mainFlow");
+
+  if (device.mode === "personale" && device.savedName) {
+    window.__currentOperaio = device.savedName;
+    renderCardSearch();
+    return;
+  }
+
+  const operai = loadOperai();
+  if (operai.length === 0) {
+    mainFlow.innerHTML = `<div class="card-box"><p class="hint">Aggiungi almeno un operaio dalle Impostazioni per iniziare.</p></div>`;
+    return;
+  }
+  mainFlow.innerHTML = `
+    <div class="card-box">
+      <div class="field"><label>Chi sei?</label>
+        <select id="whoSelect">${operai.map((n) => `<option>${escapeHtml(n)}</option>`).join("")}</select>
+      </div>
+      <button class="btn btn-amber btn-big" id="whoConfirmBtn">Continua</button>
+    </div>`;
+  document.getElementById("whoConfirmBtn").addEventListener("click", () => {
+    const name = document.getElementById("whoSelect").value;
+    window.__currentOperaio = name;
+    if (device.mode === "personale") saveDevice({ savedName: name });
+    renderCardSearch();
+  });
+}
+
+/* ---------- Ricerca card ---------- */
+
+let searchDebounce = null;
+
+function renderCardSearch() {
+  const mainFlow = document.getElementById("mainFlow");
+  mainFlow.innerHTML = `
+    <div class="who-badge">
+      <span>Operaio: <b>${escapeHtml(window.__currentOperaio)}</b></span>
+      <a href="#" id="changeWhoLink">Cambia</a>
+    </div>
+    <div class="card-box">
+      <div class="field"><label>Cerca la lavorazione (targa o nome card)</label>
+        <input type="text" id="jobSearchInput" placeholder="Es. GP452FL">
+      </div>
+      <div class="search-results" id="jobSearchResults"></div>
+    </div>
+  `;
+  document.getElementById("changeWhoLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    saveDevice({ savedName: null });
+    renderWhoAmI();
+  });
+  const input = document.getElementById("jobSearchInput");
+  input.addEventListener("input", () => {
+    clearTimeout(searchDebounce);
+    const q = input.value.trim();
+    searchDebounce = setTimeout(async () => {
+      const results = document.getElementById("jobSearchResults");
+      if (!q) { results.innerHTML = ""; return; }
+      results.innerHTML = `<div class="hint">Cerco…</div>`;
+      try {
+        const s = loadTrelloSettings();
+        const res = await trelloGet("/search", {
+          query: q, idOrganizations: s.orgId, modelTypes: "cards",
+          card_fields: "name,shortUrl,idBoard,closed", cards_limit: 20, partial: "true",
+        });
+        const cards = (res.cards || []).filter((c) => !c.closed);
+        results.innerHTML = cards.length
+          ? cards.map((c) => `<div class="item" data-id="${c.id}" data-board="${c.idBoard}" data-url="${c.shortUrl}">${escapeHtml(c.name)}</div>`).join("")
+          : `<div class="hint">Nessuna card trovata.</div>`;
+        results.querySelectorAll(".item").forEach((el) => {
+          el.addEventListener("click", () => openJob(el.dataset.id, el.dataset.board, el.textContent, el.dataset.url));
+        });
+      } catch (err) {
+        results.innerHTML = `<div class="hint" style="color:var(--red);">Errore: ${escapeHtml(err.message)}</div>`;
+      }
+    }, 350);
+  });
+  input.focus();
+}
+
+/* ---------- Job attivo: log timbrature ---------- */
+
+const MARK = "⏱️";
+let pollTimer = null;
+let tickTimer = null;
+let currentJob = null; // { id, boardId, name, url }
+
+function parseHoursFromCustomField(item, fieldType) {
+  if (!item) return null;
+  if (fieldType === "number") return item.value && item.value.number != null ? parseFloat(item.value.number) : null;
+  if (item.value && item.value.text) {
+    const m = item.value.text.replace(/\./g, "").replace(",", ".").match(/[\d.]+/);
+    return m ? parseFloat(m[0]) : null;
+  }
+  return null;
+}
+
+async function fetchTimbratureLog(cardId) {
+  const actions = await trelloGet(`/cards/${cardId}/actions`, { filter: "commentCard", limit: 1000 });
+  const events = [];
+  actions.forEach((a) => {
+    const text = (a.data && a.data.text) || "";
+    const m = text.match(new RegExp("^" + MARK + "\\s*(INIZIO|PAUSA|RIPRESA|FINE)\\s*—\\s*(.+)$"));
+    if (m) events.push({ type: m[1], name: m[2].trim(), date: new Date(a.date) });
+  });
+  events.sort((a, b) => a.date - b.date);
+  return events;
+}
+
+function computeState(events) {
+  // per-operaio: { totalMs, activeSince (Date|null) }
+  const byOperaio = {};
+  events.forEach((ev) => {
+    if (!byOperaio[ev.name]) byOperaio[ev.name] = { totalMs: 0, activeSince: null };
+    const st = byOperaio[ev.name];
+    if (ev.type === "INIZIO" || ev.type === "RIPRESA") {
+      if (!st.activeSince) st.activeSince = ev.date;
+    } else if (ev.type === "PAUSA" || ev.type === "FINE") {
+      if (st.activeSince) {
+        st.totalMs += ev.date - st.activeSince;
+        st.activeSince = null;
+      }
+    }
+  });
+  return byOperaio;
+}
+
+function formatHMS(ms) {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const h = String(Math.floor(total / 3600)).padStart(2, "0");
+  const m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
+  const s = String(total % 60).padStart(2, "0");
+  return `${h}:${m}:${s}`;
+}
+
+async function openJob(cardId, boardId, name, url) {
+  currentJob = { id: cardId, boardId, name, url };
+  clearInterval(pollTimer); clearInterval(tickTimer);
+  await refreshJobView();
+  pollTimer = setInterval(refreshJobView, 25000);
+  tickTimer = setInterval(tickClock, 1000);
+}
+
+let lastState = null;
+let lastAuthorized = null;
+
+async function refreshJobView() {
+  if (!currentJob) return;
+  try {
+    const s = loadTrelloSettings();
+    const [events, boardFields, cardFieldItems] = await Promise.all([
+      fetchTimbratureLog(currentJob.id),
+      trelloGet(`/boards/${currentJob.boardId}/customFields`),
+      trelloGet(`/cards/${currentJob.id}/customFieldItems`),
+    ]);
+    lastState = computeState(events);
+
+    let authorized = null;
+    if (s.mdoFieldName) {
+      const fieldDef = boardFields.find((f) => f.name.trim().toLowerCase() === s.mdoFieldName.trim().toLowerCase());
+      if (fieldDef) {
+        const item = cardFieldItems.find((it) => it.idCustomField === fieldDef.id);
+        authorized = parseHoursFromCustomField(item, fieldDef.type);
+      }
+    }
+    lastAuthorized = authorized;
+    renderJobView();
+  } catch (err) {
+    document.getElementById("mainFlow").insertAdjacentHTML("beforeend", `<div class="card-box err">Errore aggiornamento: ${escapeHtml(err.message)}</div>`);
+  }
+}
+
+function tickClock() {
+  if (!lastState) return;
+  renderJobView(true);
+}
+
+function renderJobView(tickOnly) {
+  const me = window.__currentOperaio;
+  const myState = lastState[me] || { totalMs: 0, activeSince: null };
+  const myElapsed = myState.totalMs + (myState.activeSince ? (Date.now() - myState.activeSince) : 0);
+  const myStatus = myState.activeSince ? "active" : (myState.totalMs > 0 ? "paused" : "idle");
+
+  let totalMs = 0;
+  Object.keys(lastState).forEach((name) => {
+    const st = lastState[name];
+    totalMs += st.totalMs + (st.activeSince ? (Date.now() - st.activeSince) : 0);
+  });
+  const totalHours = totalMs / 3600000;
+
+  if (tickOnly) {
+    const clockEl = document.getElementById("myClock");
+    if (clockEl) clockEl.textContent = formatHMS(myElapsed);
+    const totClockEl = document.getElementById("totClock");
+    if (totClockEl) totClockEl.textContent = totalHours.toFixed(2) + " h";
+    return;
+  }
+
+  const container = document.getElementById("mainFlow");
+  const perOperaioRows = Object.keys(lastState)
+    .filter((n) => lastState[n].totalMs > 0 || lastState[n].activeSince)
+    .map((n) => {
+      const st = lastState[n];
+      const ms = st.totalMs + (st.activeSince ? (Date.now() - st.activeSince) : 0);
+      return `<div class="row-op"><span>${escapeHtml(n)}${st.activeSince ? " (in corso)" : ""}</span><span>${formatHMS(ms)}</span></div>`;
+    }).join("");
+
+  const authorizedStr = lastAuthorized != null ? lastAuthorized.toFixed(2) + " h" : "—";
+  const overUnder = lastAuthorized != null ? (totalHours > lastAuthorized ? "over" : "under") : "";
+
+  let actionButtons = "";
+  if (myStatus === "idle") {
+    actionButtons = `<button class="btn btn-teal btn-big" id="startBtn">▶ Inizia lavorazione</button>`;
+  } else if (myStatus === "active") {
+    actionButtons = `
+      <div class="row">
+        <button class="btn btn-amber" id="pauseBtn">⏸ Pausa</button>
+        <button class="btn btn-red" id="finishBtn">⏹ Termina</button>
+      </div>`;
+  } else if (myStatus === "paused") {
+    actionButtons = `
+      <div class="row">
+        <button class="btn btn-teal" id="resumeBtn">▶ Riprendi</button>
+        <button class="btn btn-red" id="finishBtn">⏹ Termina</button>
+      </div>`;
+  }
+
+  container.innerHTML = `
+    <div class="who-badge">
+      <span>Operaio: <b>${escapeHtml(me)}</b></span>
+      <a href="#" id="backLink">← Cambia lavorazione</a>
+    </div>
+    <div class="card-box">
+      <div class="job-title">${escapeHtml(currentJob.name)}</div>
+      <div class="job-meta"><a href="${currentJob.url}" target="_blank">Apri su Trello →</a></div>
+
+      <div class="timer-display ${myStatus}">
+        <div class="clock" id="myClock">${formatHMS(myElapsed)}</div>
+        <div class="status-label">${myStatus === "active" ? "in corso" : myStatus === "paused" ? "in pausa" : "non ancora iniziato"}</div>
+      </div>
+
+      ${actionButtons}
+
+      <div class="compare-box">
+        <div class="cell"><div class="lbl">MDO AUTORIZZATA</div><div class="val">${authorizedStr}</div></div>
+        <div class="cell ${overUnder}"><div class="lbl">ORE REALI TOTALI</div><div class="val" id="totClock">${totalHours.toFixed(2)} h</div></div>
+      </div>
+
+      ${perOperaioRows ? `<div class="per-operaio">${perOperaioRows}</div>` : ""}
+    </div>
+  `;
+
+  document.getElementById("backLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    clearInterval(pollTimer); clearInterval(tickTimer);
+    currentJob = null;
+    renderCardSearch();
+  });
+  const startBtn = document.getElementById("startBtn");
+  if (startBtn) startBtn.addEventListener("click", () => logEvent("INIZIO"));
+  const pauseBtn = document.getElementById("pauseBtn");
+  if (pauseBtn) pauseBtn.addEventListener("click", () => logEvent("PAUSA"));
+  const resumeBtn = document.getElementById("resumeBtn");
+  if (resumeBtn) resumeBtn.addEventListener("click", () => logEvent("RIPRESA"));
+  const finishBtn = document.getElementById("finishBtn");
+  if (finishBtn) finishBtn.addEventListener("click", () => logEvent("FINE"));
+}
+
+async function logEvent(type) {
+  if (!currentJob) return;
+  const text = `${MARK} ${type} — ${window.__currentOperaio}`;
+  try {
+    await trelloPost(`/cards/${currentJob.id}/actions/comments`, { text });
+    await refreshJobView();
+  } catch (err) {
+    alert("Errore nell'invio: " + err.message);
+  }
+}
+
+boot();
+</script>
+</body>
+</html>
