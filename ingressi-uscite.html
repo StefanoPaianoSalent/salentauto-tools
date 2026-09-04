@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Salentauto — Ingressi/Uscite</title>
+<style>
+  :root{
+    --bg:#191b1e;
+    --bg-raised:#232629;
+    --line:#33373b;
+    --amber:#f0a202;
+    --amber-dim:#8a5f04;
+    --text:#eef0f2;
+    --text-dim:#9aa0a6;
+    --ok:#3fb872;
+    --err:#e3543e;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:0;
+  }
+  .app{
+    width:100%;
+    max-width:480px;
+    min-height:100vh;
+    background:var(--bg);
+    display:flex;
+    flex-direction:column;
+  }
+  header{
+    padding:28px 24px 18px;
+    border-bottom:3px solid var(--amber);
+  }
+  header .brand{
+    font-size:13px;
+    letter-spacing:0.04em;
+    color:var(--text-dim);
+    margin:0 0 4px;
+  }
+  header h1{
+    font-size:26px;
+    margin:0;
+    font-weight:700;
+  }
+  main{
+    flex:1;
+    padding:24px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  .hint{
+    color:var(--text-dim);
+    font-size:14px;
+    margin:0;
+  }
+  .employee-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .employee-btn{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:18px 10px;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:600;
+    text-align:center;
+    cursor:pointer;
+  }
+  .employee-btn:active{
+    border-color:var(--amber);
+  }
+  .selected-name{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 16px;
+  }
+  .selected-name span{font-weight:700; font-size:17px;}
+  .link-btn{
+    background:none;
+    border:none;
+    color:var(--amber);
+    font-size:14px;
+    cursor:pointer;
+    padding:0;
+  }
+  .pin-display{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    margin:6px 0 4px;
+  }
+  .pin-dot{
+    width:16px;height:16px;
+    border-radius:50%;
+    border:2px solid var(--text-dim);
+  }
+  .pin-dot.filled{
+    background:var(--amber);
+    border-color:var(--amber);
+  }
+  .keypad{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+  }
+  .key{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    color:var(--text);
+    font-size:22px;
+    font-weight:600;
+    padding:18px 0;
+    border-radius:10px;
+    cursor:pointer;
+  }
+  .key:active{border-color:var(--amber);}
+  .key.wide{grid-column:span 1;}
+  .key.ghost{
+    background:none;
+    border:none;
+    color:var(--text-dim);
+    font-size:14px;
+  }
+  .status{
+    border-radius:10px;
+    padding:16px;
+    font-size:15px;
+    line-height:1.4;
+    display:none;
+  }
+  .status.show{display:block;}
+  .status.info{background:#20242b; border:1px solid var(--line); color:var(--text-dim);}
+  .status.ok{background:#173428; border:1px solid var(--ok); color:var(--ok);}
+  .status.err{background:#3a201d; border:1px solid var(--err); color:#ff8b7a;}
+  .big-result{
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:10px;
+    padding:40px 10px;
+  }
+  .big-result.show{display:flex;}
+  .big-result .mark{
+    font-size:56px;
+  }
+  .big-result .tipo{
+    font-size:22px;
+    font-weight:700;
+  }
+  .big-result .ora{
+    font-size:15px;
+    color:var(--text-dim);
+  }
+  .primary-btn{
+    margin-top:8px;
+    background:var(--amber);
+    border:none;
+    color:#1a1200;
+    font-weight:700;
+    font-size:15px;
+    padding:14px;
+    border-radius:10px;
+    cursor:pointer;
+  }
+  .admin-bar{
+    background:#2a2210;
+    border:1px solid var(--amber-dim);
+    color:var(--amber);
+    font-size:13px;
+    padding:10px 14px;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .admin-bar button{
+    background:var(--amber);
+    border:none;
+    color:#1a1200;
+    font-weight:700;
+    font-size:13px;
+    padding:8px 12px;
+    border-radius:6px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  footer{
+    padding:16px 24px 28px;
+    color:var(--text-dim);
+    font-size:12px;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <p class="brand">SALENTAUTO</p>
+    <h1>Ingressi &amp; Uscite</h1>
+  </header>
+
+  <main>
+    <div id="adminBar" class="admin-bar" style="display:none;">
+      <span>Modalità admin: puoi impostare la posizione della sede da qui.</span>
+      <button id="btnSetSede">Imposta sede qui</button>
+    </div>
+
+    <!-- STEP 1: scelta dipendente -->
+    <div id="step1">
+      <p class="hint">Seleziona il tuo nome</p>
+      <div id="employeeGrid" class="employee-grid"></div>
+    </div>
+
+    <!-- STEP 2: PIN -->
+    <div id="step2" style="display:none;">
+      <div class="selected-name">
+        <span id="selectedNameLabel"></span>
+        <button class="link-btn" id="btnChangeName">cambia</button>
+      </div>
+      <p class="hint" style="margin-top:16px;">Inserisci il tuo PIN</p>
+      <div class="pin-display" id="pinDisplay"></div>
+      <div class="keypad" id="keypad"></div>
+    </div>
+
+    <!-- STATUS (verifica posizione / errori) -->
+    <div id="status" class="status"></div>
+
+    <!-- RISULTATO -->
+    <div id="bigResult" class="big-result">
+      <div class="mark" id="resultMark">✓</div>
+      <div class="tipo" id="resultTipo"></div>
+      <div class="ora" id="resultOra"></div>
+      <button class="primary-btn" id="btnNuova">Nuova timbratura</button>
+    </div>
+  </main>
+
+  <footer>Salentauto Srl — Viale G. Grassi 158, Lecce</footer>
+</div>
+
+<script>
+// ============ CONFIGURAZIONE ============
+// Sostituisci con l'URL del tuo Web App di Google Apps Script (finisce con /exec)
+const API_URL = "https://script.google.com/macros/s/AKfycbzc5DwHLLoE2BdGam-h1IQpnGR09ZDDqFgli0ZcrcjS5MU3AqQ9Cc2Ej9u6xdAjfw2Z-g/exec";
+
+// ============ STATO ============
+let selectedName = null;
+let pin = "";
+const params = new URLSearchParams(location.search);
+const adminKey = params.get('admin');
+
+// device token persistente sul telefono
+function getDeviceToken(){
+  let t = localStorage.getItem('salentauto_device_token');
+  if(!t){
+    t = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
+    localStorage.setItem('salentauto_device_token', t);
+  }
+  return t;
+}
+
+// ============ UI HELPERS ============
+const el = id => document.getElementById(id);
+
+function showStatus(type, msg){
+  const s = el('status');
+  s.className = 'status show ' + type;
+  s.textContent = msg;
+}
+function hideStatus(){
+  const s = el('status');
+  s.className = 'status';
+  s.textContent = '';
+}
+
+function renderPinDots(){
+  const d = el('pinDisplay');
+  d.innerHTML = '';
+  for(let i=0;i<4;i++){
+    const dot = document.createElement('div');
+    dot.className = 'pin-dot' + (i < pin.length ? ' filled' : '');
+    d.appendChild(dot);
+  }
+}
+
+function buildKeypad(){
+  const layout = ['1','2','3','4','5','6','7','8','9','ghost','0','del'];
+  const kp = el('keypad');
+  kp.innerHTML = '';
+  layout.forEach(k => {
+    const btn = document.createElement('button');
+    if(k === 'ghost'){
+      btn.className = 'key ghost';
+      btn.disabled = true;
+    } else if(k === 'del'){
+      btn.className = 'key ghost';
+      btn.textContent = '⌫';
+      btn.onclick = () => { pin = pin.slice(0,-1); renderPinDots(); };
+    } else {
+      btn.className = 'key';
+      btn.textContent = k;
+      btn.onclick = () => onDigit(k);
+    }
+    kp.appendChild(btn);
+  });
+}
+
+function onDigit(d){
+  if(pin.length >= 4) return;
+  pin += d;
+  renderPinDots();
+  if(pin.length === 4){
+    setTimeout(submitTimbratura, 150);
+  }
+}
+
+// ============ STEP 1: dipendenti ============
+async function loadEmployees(){
+  try{
+    const res = await fetch(API_URL + '?action=employees');
+    const data = await res.json();
+    const grid = el('employeeGrid');
+    grid.innerHTML = '';
+    data.dipendenti.forEach(nome => {
+      const b = document.createElement('button');
+      b.className = 'employee-btn';
+      b.textContent = nome;
+      b.onclick = () => selectEmployee(nome);
+      grid.appendChild(b);
+    });
+  }catch(err){
+    showStatus('err', 'Impossibile contattare il server. Controlla la connessione.');
+  }
+}
+
+function selectEmployee(nome){
+  selectedName = nome;
+  pin = '';
+  el('selectedNameLabel').textContent = nome;
+  el('step1').style.display = 'none';
+  el('step2').style.display = 'block';
+  renderPinDots();
+  hideStatus();
+}
+
+el('btnChangeName').onclick = () => {
+  el('step1').style.display = 'block';
+  el('step2').style.display = 'none';
+  hideStatus();
+};
+
+el('btnNuova').onclick = () => {
+  el('bigResult').className = 'big-result';
+  el('step1').style.display = 'block';
+  selectedName = null;
+  pin = '';
+  hideStatus();
+};
+
+// ============ STEP 2: PIN + GPS + invio ============
+function getPosition(){
+  return new Promise((resolve, reject) => {
+    if(!navigator.geolocation){
+      reject(new Error('Il browser non supporta la geolocalizzazione.'));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve(pos.coords),
+      err => reject(err),
+      { enableHighAccuracy:true, timeout:15000, maximumAge:0 }
+    );
+  });
+}
+
+async function submitTimbratura(){
+  showStatus('info', 'Verifica posizione in corso…');
+  el('step2').style.display = 'none';
+
+  let coords;
+  try{
+    coords = await getPosition();
+  }catch(err){
+    showStatus('err', 'Non riesco a rilevare la posizione. Attiva il GPS e i permessi di localizzazione per questa pagina, poi riprova.');
+    el('step2').style.display = 'block';
+    pin = ''; renderPinDots();
+    return;
+  }
+
+  try{
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' }, // evita preflight CORS su Apps Script
+      body: JSON.stringify({
+        action: 'timbra',
+        nome: selectedName,
+        pin: pin,
+        lat: coords.latitude,
+        lng: coords.longitude,
+        deviceToken: getDeviceToken()
+      })
+    });
+    const data = await res.json();
+
+    if(!data.success){
+      showStatus('err', data.error || 'Timbratura non riuscita.');
+      el('step2').style.display = 'block';
+      pin = ''; renderPinDots();
+      return;
+    }
+
+    hideStatus();
+    el('resultTipo').textContent = data.tipo === 'Entrata' ? 'Ingresso registrato' : 'Uscita registrata';
+    el('resultOra').textContent = 'alle ' + data.ora + ' — ' + selectedName;
+    el('bigResult').className = 'big-result show';
+  }catch(err){
+    showStatus('err', 'Errore di connessione al server. Riprova.');
+    el('step2').style.display = 'block';
+    pin = ''; renderPinDots();
+  }
+}
+
+// ============ ADMIN: imposta sede ============
+if(adminKey){
+  el('adminBar').style.display = 'flex';
+  el('btnSetSede').onclick = async () => {
+    showStatus('info', 'Rilevamento posizione attuale…');
+    try{
+      const coords = await getPosition();
+      const res = await fetch(API_URL, {
+        method:'POST',
+        headers:{'Content-Type':'text/plain'},
+        body: JSON.stringify({ action:'set_sede', adminKey, lat: coords.latitude, lng: coords.longitude })
+      });
+      const data = await res.json();
+      if(data.success){
+        showStatus('ok', 'Sede impostata su questa posizione (' + coords.latitude.toFixed(5) + ', ' + coords.longitude.toFixed(5) + ').');
+      } else {
+        showStatus('err', data.error || 'Errore impostando la sede.');
+      }
+    }catch(err){
+      showStatus('err', 'Impossibile rilevare la posizione.');
+    }
+  };
+}
+
+// ============ INIT ============
+buildKeypad();
+loadEmployees();
+</script>
+</body>
+</html>
