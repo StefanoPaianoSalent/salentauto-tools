@@ -237,6 +237,7 @@
         <span id="selectedNameLabel"></span>
         <button class="link-btn" id="btnChangeName">cambia</button>
       </div>
+      <div id="statoAttuale" class="status info" style="display:none; margin-top:12px;"></div>
       <p class="hint" style="margin-top:16px;">Inserisci il tuo PIN</p>
       <div class="pin-display" id="pinDisplay"></div>
       <div class="keypad" id="keypad"></div>
@@ -260,7 +261,7 @@
 <script>
 // ============ CONFIGURAZIONE ============
 // Sostituisci con l'URL del tuo Web App di Google Apps Script (finisce con /exec)
-const API_URL = "https://script.google.com/macros/s/AKfycbzc5DwHLLoE2BdGam-h1IQpnGR09ZDDqFgli0ZcrcjS5MU3AqQ9Cc2Ej9u6xdAjfw2Z-g/exec";
+const API_URL = "INCOLLA_QUI_URL_APPS_SCRIPT";
 
 // ============ STATO ============
 let selectedName = null;
@@ -360,17 +361,40 @@ function selectEmployee(nome){
   el('step2').style.display = 'block';
   renderPinDots();
   hideStatus();
+  loadStatoDipendente(nome);
+}
+
+async function loadStatoDipendente(nome){
+  const box = el('statoAttuale');
+  box.style.display = 'block';
+  box.className = 'status show info';
+  box.textContent = 'Verifica ultima timbratura…';
+  try{
+    const res = await fetch(API_URL + '?action=stato&nome=' + encodeURIComponent(nome));
+    const data = await res.json();
+    const prossimoLabel = data.prossimo === 'Entrata' ? 'INGRESSO' : 'USCITA';
+    if(data.ultimo){
+      const tipoLabel = data.ultimo.tipo === 'Entrata' ? 'Ingresso' : 'Uscita';
+      box.textContent = `Ultima timbratura: ${tipoLabel} il ${data.ultimo.data} alle ${data.ultimo.ora}. Adesso registrerai: ${prossimoLabel}.`;
+    } else {
+      box.textContent = `Nessuna timbratura precedente. Adesso registrerai: ${prossimoLabel}.`;
+    }
+  }catch(err){
+    box.style.display = 'none'; // se fallisce, non blocchiamo la timbratura per questo
+  }
 }
 
 el('btnChangeName').onclick = () => {
   el('step1').style.display = 'block';
   el('step2').style.display = 'none';
+  el('statoAttuale').style.display = 'none';
   hideStatus();
 };
 
 el('btnNuova').onclick = () => {
   el('bigResult').className = 'big-result';
   el('step1').style.display = 'block';
+  el('statoAttuale').style.display = 'none';
   selectedName = null;
   pin = '';
   hideStatus();
