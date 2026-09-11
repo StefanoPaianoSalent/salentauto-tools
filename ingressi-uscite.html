@@ -6,13 +6,14 @@
 <title>Salentauto — Ingressi/Uscite</title>
 <style>
   :root{
-    --bg:#191b1e;
-    --bg-raised:#232629;
-    --line:#33373b;
-    --amber:#f0a202;
-    --amber-dim:#8a5f04;
+    --bg:#0f2429;
+    --bg-raised:#183840;
+    --line:#2a4a52;
+    --teal:#1B8A9E;
+    --teal-dim:#0D3646;
+    --yellow:#FFC72C;
     --text:#eef0f2;
-    --text-dim:#9aa0a6;
+    --text-dim:#9ab0b6;
     --ok:#3fb872;
     --err:#e3543e;
   }
@@ -38,7 +39,7 @@
   }
   header{
     padding:28px 24px 18px;
-    border-bottom:3px solid var(--amber);
+    border-bottom:3px solid var(--teal);
   }
   header .brand{
     font-size:13px;
@@ -80,7 +81,7 @@
     cursor:pointer;
   }
   .employee-btn:active{
-    border-color:var(--amber);
+    border-color:var(--teal);
   }
   .selected-name{
     display:flex;
@@ -95,7 +96,7 @@
   .link-btn{
     background:none;
     border:none;
-    color:var(--amber);
+    color:var(--teal);
     font-size:14px;
     cursor:pointer;
     padding:0;
@@ -112,8 +113,8 @@
     border:2px solid var(--text-dim);
   }
   .pin-dot.filled{
-    background:var(--amber);
-    border-color:var(--amber);
+    background:var(--yellow);
+    border-color:var(--yellow);
   }
   .keypad{
     display:grid;
@@ -130,7 +131,7 @@
     border-radius:10px;
     cursor:pointer;
   }
-  .key:active{border-color:var(--amber);}
+  .key:active{border-color:var(--teal);}
   .key.wide{grid-column:span 1;}
   .key.ghost{
     background:none;
@@ -172,7 +173,7 @@
   }
   .primary-btn{
     margin-top:8px;
-    background:var(--amber);
+    background:var(--yellow);
     border:none;
     color:#1a1200;
     font-weight:700;
@@ -182,9 +183,9 @@
     cursor:pointer;
   }
   .admin-bar{
-    background:#2a2210;
-    border:1px solid var(--amber-dim);
-    color:var(--amber);
+    background:var(--teal-dim);
+    border:1px solid var(--teal);
+    color:#8fd9e6;
     font-size:13px;
     padding:10px 14px;
     border-radius:8px;
@@ -194,7 +195,7 @@
     gap:10px;
   }
   .admin-bar button{
-    background:var(--amber);
+    background:var(--yellow);
     border:none;
     color:#1a1200;
     font-weight:700;
